@@ -24,13 +24,9 @@
  */
 package TariffCalc;
 
-import java.sql.*;
-import javax.swing.JOptionPane;
-import java.awt.*;
-import javax.swing.*;
-
 public class TariffCalcMain {
     public static void main(String[] args) {
-
+        // The runner
+        TariffCalcWindow window = new TariffCalcWindow();
     }
 }
