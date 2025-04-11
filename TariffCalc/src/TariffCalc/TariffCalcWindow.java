@@ -32,7 +32,6 @@ public class TariffCalcWindow extends JFrame implements ActionListener {
     String[] countryArray;
     JPanel countryPanel = new JPanel();
     JPanel calcPanel = new JPanel();
-    JPanel outPanel = new JPanel();
     HashMap<Integer, Integer> tariffsRates = new HashMap<Integer, Integer>();
     HashMap<Integer, String> countries = new HashMap<Integer, String>();
 
@@ -41,10 +40,12 @@ public class TariffCalcWindow extends JFrame implements ActionListener {
      */
     public TariffCalcWindow() {
         setTitle("Tariff Calculator");
-        setSize(500, 500);
+        setSize(550, 460);
+        Font appFont = new Font("Dialog", Font.BOLD, 16);
         c = getContentPane();
         c.setLayout(new BorderLayout());
         c.setBackground(Color.LIGHT_GRAY);
+        c.setFont(appFont);
         // get the countries and rates and place them in our hashmaps
         try {
             getCountries();
@@ -55,21 +56,42 @@ public class TariffCalcWindow extends JFrame implements ActionListener {
         countryBox = new JComboBox(countryArray);
 
         countryPanel = new JPanel(new GridLayout(3, 1));
+        countryPanel.setFont(appFont);
+        labelIntro.setFont(appFont);
+        selectPrompt.setFont(appFont);
+        countryBox.setFont(appFont);
         countryPanel.add(labelIntro);
         countryPanel.add(selectPrompt);
         countryPanel.add(countryBox);
 
-        calcPanel = new JPanel(new GridLayout(3, 1));
+        //calcPanel = new JPanel(new GridLayout(3, 1));
+        calcPanel = new JPanel(null);
+        calcPanel.setFont(appFont);
+        inputPricePrompt.setBounds(20, 20, 300, 50);
+        inputPrice.setBounds(330, 20, 190, 50);
+        calculateButton.setBounds(330, 250, 150, 50);
+
         calcPanel.add(inputPricePrompt);
         calcPanel.add(inputPrice);
         calcPanel.add(calculateButton);
 
-        //outPanel = new JPanel(new GridLayout(3, 2));
-        outPanel = new JPanel(new GridBagLayout());
-        outPanel.add(tariffPaidLabel);
-        outPanel.add(tariffPaid);
-        outPanel.add(totalPaidLabel);
-        outPanel.add(totalPaid);
+        tariffPaidLabel.setBounds(20, 100, 150, 50);
+        tariffPaid.setBounds(130, 100, 389, 50);
+        totalPaidLabel.setBounds(20, 170, 150, 50);
+        totalPaid.setBounds(130, 170, 389, 50);
+
+        inputPrice.setFont(appFont);
+        inputPricePrompt.setFont(appFont);
+        calculateButton.setFont(appFont);
+        tariffPaid.setFont(appFont);
+        tariffPaidLabel.setFont(appFont);
+        totalPaid.setFont(appFont);
+        totalPaidLabel.setFont(appFont);
+
+        calcPanel.add(tariffPaidLabel);
+        calcPanel.add(tariffPaid);
+        calcPanel.add(totalPaidLabel);
+        calcPanel.add(totalPaid);
 
         tariffPaid.setEditable(false);
         totalPaid.setEditable(false);
@@ -78,7 +100,7 @@ public class TariffCalcWindow extends JFrame implements ActionListener {
 
         c.add(countryPanel, BorderLayout.NORTH);
         c.add(calcPanel, BorderLayout.CENTER);
-        c.add(outPanel, BorderLayout.SOUTH);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
@@ -131,24 +153,44 @@ public class TariffCalcWindow extends JFrame implements ActionListener {
         return url;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) throws IllegalArgumentException {
+    /*
+     * This method contains the logic that performs the calculation
+     */
+    public void calculatePrice() {
         String nation = countryBox.getSelectedItem().toString();
         double rate = (double) tariffsRates.get(countryBox.getSelectedIndex() + 1) / 100;
         double tariffPrice;
-        double totalPaid;
+        double totalPricePaid;
         double currentPrice = Double.parseDouble(inputPrice.getText());
 
         if(currentPrice < DE_MINIMIS && !nation.equals("China")) {
             tariffPrice = 0;
-            totalPaid = currentPrice;
+            totalPricePaid = currentPrice + tariffPrice;
+            totalPricePaid = Math.round(totalPricePaid * 100.0) / 100.0;
             tariffPaid.setText("Under the De Minimis - No tariffs");
-            totalPaidLabel.setText("Total paid: $" + totalPaid);
+            totalPaid.setText("Total paid: $" + totalPricePaid);
         } else {
-            tariffPrice = currentPrice / rate;
-            totalPaid = currentPrice + tariffPrice;
+            tariffPrice = Math.round((currentPrice / rate) * 100.0) / 100.0;
+            totalPricePaid = Math.round((currentPrice + tariffPrice) * 100.0) / 100.0;
             tariffPaid.setText("You'll pay $" + tariffPrice);
-            totalPaidLabel.setText("Total paid: $" + totalPaid);
+            totalPaid.setText("Total paid: $" + totalPricePaid);
+        }
+    }
+
+    /*
+     * What happens when we click the button.
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) throws IllegalArgumentException {
+        try {
+            calculatePrice(); // Logic calculation
+        } catch (NumberFormatException nfe) { // errors
+            tariffPaid.setText("Not a valid number!");
+            System.out.println("Not a number!");
+            nfe.printStackTrace();
+        } catch (Exception err) {
+            System.out.println("Unknown error!");
+            err.printStackTrace();
         }
     }
 }
